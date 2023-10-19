@@ -1,11 +1,5 @@
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passport and indentity", quantity: 2, packed: false },
-  { id: 2, description: "Back pack and foods", quantity: 1, packed: true },
-  { id: 3, description: "Phone and Charger", quantity: 2, packed: true },
-];
-
 export default function App() {
   const [items, setItems] = useState([]);
 
@@ -13,11 +7,27 @@ export default function App() {
     setItems((items) => [...items, item]);
   }
 
+  function handleDeleteItem(id) {
+    setItems(items.filter((item) => item.id !== id));
+  }
+
+  function handleTogglePacked(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItem} />
-      <PackingList items={items} />
+      <PackingList
+        onDeleteItem={handleDeleteItem}
+        items={items}
+        onTogglePacked={handleTogglePacked}
+      />
       <Stats />
     </div>
   );
@@ -66,23 +76,33 @@ function Form({ onAddItems }) {
   );
 }
 
-function Item({ item }) {
+function Item({ item, onDeleteItem, onTogglePacked }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => onTogglePacked(item.id)}
+      />
       <span style={!item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
-        <button>❌</button>
+        <button onClick={() => onDeleteItem(item.id)}>❌</button>
       </span>
     </li>
   );
 }
 
-function PackingList({ items }) {
+function PackingList({ items, onDeleteItem, onTogglePacked }) {
   return (
     <div className="list">
       <ul>
         {items.map((item) => (
-          <Item key={item.id} item={item} />
+          <Item
+            onTogglePacked={onTogglePacked}
+            onDeleteItem={onDeleteItem}
+            key={item.id}
+            item={item}
+          />
         ))}
       </ul>
     </div>
